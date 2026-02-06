@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Applications{% endblock %}
+
+{% block content %}
+
+<style>
+    /* ── User Dashboard Specific Styles ── */
+    .dashboard-welcome {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #2c3e50;
+    }
+
+    .search-container {
+        max-width: 680px;
+        margin: 0 auto 2.5rem;
+        position: relative;
+    }
+
+    .search-container input {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 1.05rem;
+        border: 2px solid #dfe6e9;
+        border-radius: 12px;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .search-container input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+    }
+
+    .search-container button {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 10px 24px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .search-container button:hover {
+        background: #2980b9;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        color: #2c3e50;
+        margin: 2.5rem 0 1.5rem;
+        font-weight: 600;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        padding: 1rem 0;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        border: 1px solid #eee;
+    }
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 36px rgba(0,0,0,0.12);
+    }
+
+    .product-image {
+        height: 200px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-image img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.06);
+    }
+
+    .product-info {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .product-info h3 {
+        margin: 0 0 0.8rem;
+        font-size: 1.35rem;
+        color: #2c3e50;
+    }
+
+    .product-meta p {
+        margin: 0.5rem 0;
+        color: #555;
+        font-size: 0.98rem;
+    }
+
+    .rating-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+
+    .excellent { background: #27ae60; color: white; }
+    .good      { background: #3498db; color: white; }
+    .neutral   { background: #95a5a6; color: white; }
+    .poor      { background: #e74c3c; color: white; }
+
+    .review-btn {
+        display: block;
+        width: 100%;
+        margin-top: 1.2rem;
+        padding: 12px;
+        background: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.25s, transform 0.2s;
+    }
+
+    .review-btn:hover {
+        background: #27ae60;
+        transform: translateY(-2px);
+    }
+
+    /* Feedback Section */
+    .feedback-section {
+        background: #f9fbfc;
+        padding: 2.5rem;
+        border-radius: 16px;
+        margin: 4rem 0 2rem;
+        border: 1px solid #ecf0f1;
+    }
+
+    .feedback-section textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 14px;
+        font-size: 1.05rem;
+        border: 2px solid #dfe6e9;
+        border-radius: 12px;
+        resize: vertical;
+        transition: border-color 0.25s;
+    }
+
+    .feedback-section textarea:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.12);
+    }
+
+    .feedback-submit {
+        margin-top: 1.2rem;
+        padding: 14px 32px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.25s, transform 0.2s;
+    }
+
+    .feedback-submit:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem 1rem;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+
+    @media (max-width: 600px) {
+        .search-container button {
+            position: static;
+            margin-top: 12px;
+            width: 100%;
+        }
+    }
+</style>
+
+<h2 class="dashboard-welcome">Welcome, {{ current_user.username }}!</h2>
+
+<div class="dashboard-info" style="text-align:center; margin-bottom:2rem;">
+    <p>Browse applications below and help the community by sharing your honest reviews.</p>
+</div>
+
+<!-- Search -->
+<div class="search-container">
+    <form method="GET" action="{{ url_for('dashboard') }}">
+        <input type="text" 
+               name="q" 
+               placeholder="Search by name, category or description..." 
+               value="{{ request.args.get('q', '') }}">
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<h3 class="section-title">
+    Applications 
+    {% if request.args.get('q') %}
+        → Search results for: "{{ request.args.get('q') }}"
+    {% else %}
+        → Sorted by average sentiment score
+    {% endif %}
+</h3>
+
+{% if applications %}
+<div class="product-grid">
+    {% for app in applications %}
+    <div class="product-card">
+        <div class="product-image">
+            {% if app.image_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + app.image_filename) }}" 
+                 alt="{{ app.name }}">
+            {% else %}
+            <div style="color:#95a5a6; font-size:1.1rem;">No Image</div>
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <h3>{{ app.name }}</h3>
+            
+            <div class="product-meta">
+                <p><strong>Category:</strong> {{ app.category or 'Not specified' }}</p>
+                <p><strong>Official Rating:</strong> 
+                    {{ app.official_rating|default('—', true) }} / 5
+                </p>
+                <p><strong>Avg. Sentiment:</strong> {{ app.average_sentiment_score|round(2) }}</p>
+            </div>
+
+            <span class="rating-badge 
+                {% if app.average_sentiment_score >= 0.6 %}excellent
+                {% elif app.average_sentiment_score >= 0.2 %}good
+                {% elif app.average_sentiment_score <= -0.2 %}poor
+                {% else %}neutral{% endif %}">
+                {% if app.average_sentiment_score >= 0.6 %}Excellent
+                {% elif app.average_sentiment_score >= 0.2 %}Good
+                {% elif app.average_sentiment_score <= -0.2 %}Poor
+                {% else %}Neutral{% endif %}
+            </span>
+
+            <a href="{{ url_for('review_page', app_id=app.id) }}">
+                <button class="review-btn">Write / Read Reviews</button>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="no-results">
+    <p>No applications found.</p>
+    {% if request.args.get('q') %}
+    <p>Try different keywords or <a href="{{ url_for('dashboard') }}">clear search</a>.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Feedback -->
+<div class="feedback-section">
+    <h3 style="margin-top:0; color:#2c3e50;">Send Feedback to the Team</h3>
+    <p style="color:#7f8c8d; margin-bottom:1.5rem;">Your suggestions help us improve the platform.</p>
+
+    <form action="{{ url_for('submit_feedback') }}" method="POST">
+        <textarea name="message" 
+                  rows="5" 
+                  placeholder="Your feedback, suggestions, bugs, or ideas..." 
+                  required></textarea>
+        <button type="submit" class="feedback-submit">Submit Feedback</button>
+    </form>
+</div>
+
+{% endblock %}

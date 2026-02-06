@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Manage Reviews{% endblock %}
+
+{% block content %}
+<h2>All Application Reviews</h2>
+
+{% if reviews %}
+<table border="1">
+    <tr>
+        <th>User</th>
+        <th>Application</th>
+        <th>Review</th>
+        <th>IP Address</th>
+        <th>Sentiment Score</th>
+        <th>Sentiment Label</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    {% for review in reviews %}
+    <tr>
+        <td>{{ review.user.username }}</td>
+        <td>{{ review.application.name }}</td>
+        <td>{{ review.review_text|truncate(120) }}</td>
+        <td>{{ review.ip_address }}</td>
+        <td>{{ review.sentiment_score|round(2) if review.sentiment_score else 'N/A' }}</td>
+        <td class="{{ review.sentiment_label|lower if review.sentiment_label else '' }}">
+            {{ review.sentiment_label|capitalize if review.sentiment_label else 'N/A' }}
+        </td>
+        <td>
+            {% if review.is_fake %}
+            <span style="color: red; font-weight: bold;">Fake</span>
+            {% else %}
+            <span style="color: green;">Valid</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if review.is_fake or current_user.role == 'admin' %}
+            <a href="{{ url_for('delete_review', review_id=review.id) }}"
+               onclick="return confirm('Are you sure you want to delete this review?');"
+               class="danger">Delete</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No reviews have been submitted yet.</p>
+{% endif %}
+
+<p><a href="{{ url_for('dashboard') }}">← Back to Dashboard</a></p>
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Manage Applications{% endblock %}
+
+{% block content %}
+<h2>Manage Applications</h2>
+
+<p><a href="{{ url_for('add_application') }}" style="background:#2ecc71; color:white; padding:10px 16px; border-radius:6px; text-decoration:none;">+ Add New Application</a></p>
+
+{% if applications %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Rating</th>
+            <th>Status</th>
+            <th>Added</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.id }}</td>
+            <td>{{ app.name }}</td>
+            <td>{{ app.category or '-' }}</td>
+            <td>{{ app.official_rating or '-' }}</td>
+            <td>
+                <span style="color:{% if app.fraud_status=='safe' %}green{% elif app.fraud_status in ['suspicious','scam'] %}red{% else %}orange{% endif %}">
+                    {{ app.fraud_status|capitalize }}
+                </span>
+            </td>
+            <td>{{ app.added_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('edit_application', app_id=app.id) }}" style="color:#3498db;">Edit</a> |
+                <a href="{{ url_for('delete_application', app_id=app.id) }}"
+                   onclick="return confirm('Delete {{ app.name }}?');"
+                   style="color:#e74c3c;">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p><em>No applications yet.</em></p>
+{% endif %}
+
+<p><a href="{{ url_for('dashboard') }}">← Back to Dashboard</a></p>
+
+{% endblock %}

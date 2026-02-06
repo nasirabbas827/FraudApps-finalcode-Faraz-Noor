@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<h2>Welcome, Admin {{ current_user.username }}</h2>
+
+<!-- Stats Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 25px 0;">
+    <div class="dashboard-info" style="background: #e8f5e9; border-left: 5px solid #4caf50;">
+        <h4 style="margin: 0 0 8px 0; color: #2e7d32;">Total Applications</h4>
+        <p style="font-size: 2.1rem; margin: 0; font-weight: bold;">{{ total_applications }}</p>
+    </div>
+
+    <div class="dashboard-info" style="background: #fff3e0; border-left: 5px solid #f57c00;">
+        <h4 style="margin: 0 0 8px 0; color: #ef6c00;">Suspicious Applications</h4>
+        <p style="font-size: 2.1rem; margin: 0; font-weight: bold;">{{ suspicious_applications }}</p>
+    </div>
+
+    <div class="dashboard-info" style="background: #e3f2fd; border-left: 5px solid #1976d2;">
+        <h4 style="margin: 0 0 8px 0; color: #1565c0;">Total Reviews</h4>
+        <p style="font-size: 2.1rem; margin: 0; font-weight: bold;">{{ total_reviews }}</p>
+    </div>
+
+    <div class="dashboard-info" style="background: #ffebee; border-left: 5px solid #c62828;">
+        <h4 style="margin: 0 0 8px 0; color: #b71c1c;">Flagged Fake Reviews</h4>
+        <p style="font-size: 2.1rem; margin: 0; font-weight: bold;">{{ flagged_fake_reviews }}</p>
+    </div>
+
+    <div class="dashboard-info" style="background: #e0f7fa; border-left: 5px solid #00acc1;">
+        <h4 style="margin: 0 0 8px 0; color: #006064;">Total Feedbacks</h4>
+        <p style="font-size: 2.1rem; margin: 0; font-weight: bold;">{{ total_feedbacks }}</p>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin: 30px 0; text-align: center;">
+    <a href="{{ url_for('admin_applications') }}" 
+       style="display: inline-block; padding: 14px 28px; margin: 8px; background: #27ae60; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;">
+        Manage Applications
+    </a>
+
+    <a href="{{ url_for('admin_reviews') }}" 
+       style="display: inline-block; padding: 14px 28px; margin: 8px; background: #2980b9; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;">
+        Manage Reviews
+    </a>
+
+    <a href="{{ url_for('admin_view_feedbacks') }}" 
+       style="display: inline-block; padding: 14px 28px; margin: 8px; background: #8e44ad; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;">
+        View Feedbacks
+    </a>
+
+    <a href="{{ url_for('dashboard') }}" 
+       style="display: inline-block; padding: 14px 28px; margin: 8px; background: #7f8c8d; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1.1rem;">
+        Refresh Dashboard
+    </a>
+</div>
+
+<!-- Recent Applications -->
+<h3>Recently Added Applications</h3>
+
+{% if recent_applications %}
+<div class="product-grid">
+    {% for app in recent_applications %}
+    <div class="product-card">
+        {% if app.image_filename %}
+        <div class="product-image">
+            <img src="{{ url_for('static', filename='uploads/' + app.image_filename) }}" 
+                 alt="{{ app.name }}" style="max-height: 140px; object-fit: contain;">
+        </div>
+        {% else %}
+        <div style="height: 140px; background: #ecf0f1; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+            <span style="color: #95a5a6; font-size: 1.1rem;">No Image</span>
+        </div>
+        {% endif %}
+
+        <div class="product-info">
+            <h3 style="margin: 12px 0 6px 0; font-size: 1.25rem;">{{ app.name }}</h3>
+            <p style="margin: 4px 0; color: #7f8c8d;">
+                <strong>Category:</strong> {{ app.category or '—' }}
+            </p>
+            <p style="margin: 4px 0;">
+                <strong>Rating:</strong> 
+                {% if app.official_rating %}
+                    {{ app.official_rating }} / 5
+                {% else %}
+                    —
+                {% endif %}
+            </p>
+            <p style="margin: 8px 0 12px 0;">
+                <strong>Status:</strong> 
+                <span style="
+                    padding: 4px 10px; 
+                    border-radius: 12px; 
+                    font-size: 0.9rem; 
+                    {% if app.fraud_status == 'safe' %}background:#d4edda; color:#155724;
+                    {% elif app.fraud_status == 'suspicious' %}background:#fff3cd; color:#856404;
+                    {% elif app.fraud_status == 'scam' %}background:#f8d7da; color:#721c24;
+                    {% else %}background:#cce5ff; color:#004085;{% endif %}
+                ">
+                    {{ app.fraud_status|capitalize }}
+                </span>
+            </p>
+            <a href="{{ url_for('edit_application', app_id=app.id) }}" 
+               style="background:#3498db; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:0.95rem;">
+                Edit
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: #7f8c8d; font-style: italic;">No applications added yet.</p>
+{% endif %}
+
+<!-- Recent Reviews -->
+<h3 style="margin-top: 40px;">Recent Reviews</h3>
+
+{% if recent_reviews %}
+<div class="review-grid">
+    {% for review in recent_reviews %}
+    <div class="review-card">
+        <div class="user-info">
+            Review by <strong>User #{{ review.user_id }}</strong> • 
+            <span style="color:#7f8c8d;">{{ review.ip_address }}</span>
+        </div>
+        <div class="review-text">
+            "{{ review.review_text|truncate(120) }}"
+        </div>
+        <div class="sentiment-info">
+            Sentiment: 
+            <strong class="{{ review.sentiment_label if review.sentiment_label else 'neutral' }}">
+                {{ review.sentiment_label|capitalize if review.sentiment_label else '—' }}
+            </strong>
+            {% if review.is_fake %}
+            <span style="color:#c0392b; font-weight:bold; margin-left:10px;">(FLAGGED FAKE)</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="color: #7f8c8d; font-style: italic;">No recent reviews.</p>
+{% endif %}
+
+<!-- Fake Reviews Highlight -->
+<h3 style="margin-top: 40px; color: #c0392b;">Recently Detected Fake Reviews</h3>
+
+{% if fake_reviews %}
+<ul style="list-style: none; padding: 0;">
+    {% for review in fake_reviews %}
+    <li style="background:#fff5f5; padding:12px; margin:8px 0; border-left:4px solid #e74c3c; border-radius:4px;">
+        <strong>User #{{ review.user_id }}</strong> on App #{{ review.application_id }}<br>
+        <em>"{{ review.review_text|truncate(100) }}"</em>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p style="color: #27ae60;">No fake reviews detected recently. Good job!</p>
+{% endif %}
+
+{% endblock %}

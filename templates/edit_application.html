@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Edit Application{% endblock %}
+
+{% block content %}
+<h2>Edit Application: {{ application.name }}</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <div>
+        <label for="name">Application Name *</label><br>
+        <input type="text" id="name" name="name" value="{{ application.name }}" required>
+    </div>
+
+    <div>
+        <label for="link">Download Link *</label><br>
+        <input type="url" id="link" name="link" value="{{ application.link }}" required>
+    </div>
+
+    <div>
+        <label for="description">Description *</label><br>
+        <textarea id="description" name="description" rows="6" required>{{ application.description }}</textarea>
+    </div>
+
+    <div>
+        <label for="category">Category</label><br>
+        <select id="category" name="category">
+            <option value="">-- Select --</option>
+            {% for cat in ['Social','Games','Productivity','Tools','Entertainment','Education','Finance','Other'] %}
+                <option value="{{ cat }}" {% if application.category == cat %}selected{% endif %}>{{ cat }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <label for="official_rating">Official Rating (0-5)</label><br>
+        <input type="number" id="official_rating" name="official_rating" step="0.1" min="0" max="5"
+               value="{{ application.official_rating if application.official_rating else '' }}">
+    </div>
+
+    <div>
+        <label for="fraud_status">Fraud Status</label><br>
+        <select id="fraud_status" name="fraud_status">
+            <option value="pending"  {% if application.fraud_status == 'pending'  %}selected{% endif %}>Pending</option>
+            <option value="safe"     {% if application.fraud_status == 'safe'     %}selected{% endif %}>Safe</option>
+            <option value="suspicious" {% if application.fraud_status == 'suspicious' %}selected{% endif %}>Suspicious</option>
+            <option value="scam"     {% if application.fraud_status == 'scam'     %}selected{% endif %}>Scam</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Current Image:</label><br>
+        {% if application.image_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + application.image_filename) }}" alt="Current" style="max-width:180px; border-radius:8px;">
+        {% else %}
+            <p><em>No image uploaded yet.</em></p>
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="image">Replace Image</label><br>
+        <input type="file" id="image" name="image" accept="image/*">
+    </div>
+
+    <button type="submit">Update Application</button>
+</form>
+
+<p><a href="{{ url_for('admin_applications') }}">← Back to Applications</a></p>
+
+{% endblock %}

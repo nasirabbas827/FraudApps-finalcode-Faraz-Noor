@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Add Application{% endblock %}
+
+{% block content %}
+<h2>Add New Application</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <div>
+        <label for="name">Application Name *</label><br>
+        <input type="text" id="name" name="name" required placeholder="e.g. Telegram">
+    </div>
+
+    <div>
+        <label for="link">Download Link *</label><br>
+        <input type="url" id="link" name="link" required placeholder="https://play.google.com/...">
+    </div>
+
+    <div>
+        <label for="description">Description *</label><br>
+        <textarea id="description" name="description" rows="5" required></textarea>
+    </div>
+
+    <div>
+        <label for="category">Category</label><br>
+        <select id="category" name="category">
+            <option value="">-- Select --</option>
+            <option value="Social">Social</option>
+            <option value="Games">Games</option>
+            <option value="Productivity">Productivity</option>
+            <option value="Tools">Tools</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Education">Education</option>
+            <option value="Finance">Finance</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="official_rating">Official Rating (0-5)</label><br>
+        <input type="number" id="official_rating" name="official_rating" step="0.1" min="0" max="5" placeholder="4.3">
+    </div>
+
+    <div>
+        <label for="fraud_status">Fraud Status</label><br>
+        <select id="fraud_status" name="fraud_status">
+            <option value="pending">Pending</option>
+            <option value="safe">Safe</option>
+            <option value="suspicious">Suspicious</option>
+            <option value="scam">Scam</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="image">App Icon / Image</label><br>
+        <input type="file" id="image" name="image" accept="image/*">
+        <small>(max 8MB)</small>
+    </div>
+
+    <button type="submit">Save Application</button>
+</form>
+
+<p><a href="{{ url_for('admin_applications') }}">← Back to Applications</a></p>
+
+{% endblock %}

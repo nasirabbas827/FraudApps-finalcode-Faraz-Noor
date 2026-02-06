@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}App Review System{% endblock %}</title>
+    <style>
+        :root {
+            --primary:    #3498db;     /* main blue */
+            --primary-dark: #2980b9;
+            --success:    #27ae60;
+            --danger:     #e74c3c;
+            --warning:    #f39c12;
+            --info:       #8e44ad;
+            --dark:       #2c3e50;
+            --gray:       #7f8c8d;
+            --light:      #ecf0f1;
+            --bg:         #f4f7fa;
+            --card-bg:    #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: #2d3436;
+            line-height: 1.6;
+        }
+
+        /* ── Navigation ─────────────────────────────────────────────────────── */
+        nav {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            transition: color 0.3s;
+        }
+
+        .nav-brand:hover {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #dfe6e9;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: white;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -6px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .admin-indicator {
+            background: var(--danger);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .separator {
+            color: #636e72;
+            font-weight: bold;
+        }
+
+        /* ── Flash Messages ────────────────────────────────────────────────── */
+        .flash-container {
+            max-width: 1000px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .success, .danger, .info, .warning {
+            padding: 1rem 1.5rem;
+            margin: 0.8rem 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .success  { background: #e8f5e9; color: #1b5e20; border-left: 5px solid #43a047; }
+        .danger   { background: #ffebee; color: #b71c1c; border-left: 5px solid #e53935; }
+        .info     { background: #e3f2fd; color: #0d47a1; border-left: 5px solid #1e88e5; }
+        .warning  { background: #fff3e0; color: #ef6c00; border-left: 5px solid #fb8c00; }
+
+        /* ── Main Container ────────────────────────────────────────────────── */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ── Headings ──────────────────────────────────────────────────────── */
+        h2, h3 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* ── Buttons (global) ──────────────────────────────────────────────── */
+        button, .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:hover, .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52,152,219,0.25);
+        }
+
+        /* ── Tables ────────────────────────────────────────────────────────── */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            padding: 1.1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8fbff;
+        }
+
+        /* ── Forms ─────────────────────────────────────────────────────────── */
+        form {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            max-width: 580px;
+            margin: 2rem auto;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            margin: 0.6rem 0;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.25s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(52,152,219,0.12);
+        }
+
+        /* ── Product / Review Cards (from your project) ────────────────────── */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.8rem;
+            margin: 2rem 0;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+        }
+
+        .product-image {
+            height: 220px;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .review-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.6rem;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.4rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        .positive { color: #27ae60; font-weight: 600; }
+        .negative { color: #e74c3c; font-weight: 600; }
+        .neutral  { color: #3498db; font-weight: 600; }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1.2rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <a href="{{ url_for('dashboard') }}" class="nav-brand">App Reviews</a>
+
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin_applications') }}">Applications</a>
+                        <a href="{{ url_for('admin_reviews') }}">Reviews</a>
+                        <a href="{{ url_for('admin_view_feedbacks') }}">Feedbacks</a>
+                        <span class="separator">|</span>
+                        <a href="{{ url_for('logout') }}">
+                            Logout
+                            <span class="admin-indicator">ADMIN</span>
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('logout') }}">Logout</a>
+                    {% endif %}
+
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

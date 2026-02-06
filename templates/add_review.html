@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Review - {{ application.name }}{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 900px; margin: 0 auto 30px auto;">
+    <h2>Write a Review for {{ application.name }}</h2>
+
+    <!-- Application Details Card -->
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #e0e0e0;">
+        <div style="display: flex; gap: 25px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Image -->
+            <div style="flex: 0 0 180px;">
+                {% if application.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + application.image_filename) }}" 
+                     alt="{{ application.name }}"
+                     style="max-width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                {% else %}
+                <div style="width: 180px; height: 180px; background: #ecf0f1; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                    <span style="color: #95a5a6;">No Image</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div style="flex: 1; min-width: 300px;">
+                <h3 style="margin-top: 0;">{{ application.name }}</h3>
+                
+                <p><strong>Category:</strong> {{ application.category or 'Not specified' }}</p>
+                
+                <p><strong>Official Rating:</strong> 
+                    {% if application.official_rating is not none %}
+                        {{ application.official_rating }} / 5
+                    {% else %}
+                        Not rated
+                    {% endif %}
+                </p>
+
+                <p><strong>Fraud Status:</strong> 
+                    <span style="
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                        font-size: 0.9rem;
+                        {% if application.fraud_status == 'safe' %}background:#d4edda;color:#155724;
+                        {% elif application.fraud_status == 'suspicious' %}background:#fff3cd;color:#856404;
+                        {% elif application.fraud_status == 'scam' %}background:#f8d7da;color:#721c24;
+                        {% else %}background:#cce5ff;color:#004085;{% endif %}
+                    ">
+                        {{ application.fraud_status|capitalize }}
+                    </span>
+                </p>
+
+                <p><strong>Download Link:</strong> 
+                    <a href="{{ application.link }}" target="_blank" style="color: #3498db;">{{ application.link }}</a>
+                </p>
+
+                <p><strong>Description:</strong><br>{{ application.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Form -->
+    <form action="{{ url_for('add_review', app_id=application.id) }}" method="POST">
+        <label for="review"><strong>Your Review:</strong></label><br>
+        <textarea name="review" id="review" rows="6" required 
+                  placeholder="Share your honest experience with this app..." 
+                  style="width: 100%; padding: 12px; font-size: 1rem; border-radius: 6px; border: 1px solid #ddd;"></textarea>
+        <br><br>
+        <button type="submit" style="padding: 12px 30px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1.05rem;">
+            Submit Review
+        </button>
+    </form>
+
+    <hr style="margin: 40px 0;">
+
+    <h3>Existing Reviews ({{ reviews|length }})</h3>
+
+    {% if reviews %}
+    <div class="review-grid">
+        {% for review in reviews %}
+        <div class="review-card">
+            <p class="user-info">
+                <strong>User ID {{ review.user_id }}</strong> 
+                <span style="color:#7f8c8d; margin-left:10px;">{{ review.ip_address }}</span>
+            </p>
+            <p class="review-text">{{ review.review_text }}</p>
+            <div class="sentiment-info">
+                <strong>Sentiment:</strong> 
+                <span class="{{ review.sentiment_label|lower if review.sentiment_label else 'neutral' }}">
+                    {{ review.sentiment_label|capitalize if review.sentiment_label else 'Not analyzed' }}
+                </span>
+                {% if review.sentiment_score is not none %}
+                (Score: {{ review.sentiment_score|round(2) }})
+                {% endif %}
+            </div>
+            {% if review.is_fake %}
+            <p style="color: #e74c3c; font-weight: bold; margin-top: 8px;">⚠️ Marked as potentially fake</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #7f8c8d; font-style: italic;">No reviews yet. Be the first to review!</p>
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        <a href="{{ url_for('dashboard') }}" style="color: #3498db; text-decoration: none;">← Back to Dashboard</a>
+    </p>
+
+{% endblock %}
